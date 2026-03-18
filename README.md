@@ -5,12 +5,20 @@ This repository is the starting point for learning clean machine learning projec
 ## Goal
 Build a regression project step by step, beginning with environment setup, project structure, and script-based workflow.
 
+## Current Features
+
+- project structure for ML workflows
+- CLI-driven training script
+- dataset path validation
+- file and console logging
+
 ## Project Structure
 
 - `src/` contains Python scripts
 - `data/` contains datasets
 - `notebooks/` contains exploration notebooks
 - `tests/` contains tests
+- `logs/` contains generated log files
 
 ## Environment
 
