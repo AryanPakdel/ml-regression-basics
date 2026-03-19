@@ -1,5 +1,5 @@
 from datetime import datetime
-from data_loader import check_dataset_exists
+from data_loader import check_dataset_path,load_csv_rows,get_csv_summary
 import argparse
 import logging
 from pathlib import Path
@@ -38,7 +38,7 @@ def setup_logging():
 def parse_args_from_command_line():
     parser = argparse.ArgumentParser(description="Training pipeline")
     parser.add_argument(
-        "--data",
+        "--dataset",
         type=str,
         required=True,
         help="Path to dataset"
@@ -52,11 +52,26 @@ def main() -> None:
     args = parse_args_from_command_line()
     logger = setup_logging()
     logger.info("Starting training pipeline")
+    dataset_path = Path(args.dataset)
+    if not check_dataset_path(dataset_path):
+        logger.warning(f"Dataset not found: {dataset_path}")
+        return
+    
+    logger.info("Dataset path is valid")
 
-    if check_dataset_exists(args.data):
-        logger.info(f"Dataset found at: {args.data}")
-    else:
-        logger.warning(f"Dataset not found: {args.data}")
+    try:
+        rows = load_csv_rows(dataset_path)
+    except RuntimeError as error:
+        logger.error("%s", error)
+        return
+
+    summary = get_csv_summary(rows)
+
+    logger.info("CSV loaded successfully")
+    logger.info("Row count: %d", summary["row_count"])
+    logger.info("Column count: %d", summary["column_count"])
+    logger.info("Headers: %s", summary["headers"])
+        
 
 
 if __name__ == "__main__":
