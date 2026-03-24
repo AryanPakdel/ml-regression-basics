@@ -1,6 +1,7 @@
 from datetime import datetime
 from array_utils import rows_to_numpy , compute_basic_stats
-from data_loader import check_dataset_path,load_csv_rows,get_csv_summary
+from data_loader import check_dataset_path, load_csv_rows, get_csv_summary, find_inconsistent_rows, find_missing_values, \
+    find_non_numeric_values
 import argparse
 import logging
 from pathlib import Path
@@ -59,15 +60,17 @@ def main() -> None:
     if not check_dataset_path(dataset_path):
         logger.warning(f"Dataset not found: {dataset_path}")
         return
-    
     logger.info("Dataset path is valid")
-
 
     #Loading dataset
     try:
         rows = load_csv_rows(dataset_path)
     except RuntimeError as error:
         logger.error("%s", error)
+        return
+
+    if not rows:
+        logger.warning("Dataset is empty")
         return
 
     #get dataset summary
@@ -77,7 +80,30 @@ def main() -> None:
     logger.info("Column count: %d", summary["column_count"])
     logger.info("Headers: %s", summary["headers"])
 
+    #Data Validation
+    logger.info("Running data quality checks")
+    inconsistent_rows = find_inconsistent_rows(rows)
+    missing_entries = find_missing_values(rows)
+    non_numeric_values = find_non_numeric_values(rows)
+
+    logger.info("Inconsistent rows: %d", len(inconsistent_rows))
+    logger.info("Missing values: %d", len(missing_entries))
+    logger.info("Non-numeric values: %d", len(non_numeric_values))
+
+    if inconsistent_rows:
+        logger.warning("Inconsistent rows found: %s", inconsistent_rows)
+    if missing_entries:
+        logger.warning("Missing values found: %s", missing_entries)
+    if non_numeric_values:
+        logger.warning("Non-numeric values found: %s", non_numeric_values)
+    if inconsistent_rows or missing_entries or non_numeric_values:
+        logger.error("Data validation failed. Stopping pipeline.")
+        return
+
+    logger.info("Data validation passed")
+
     #convert dataset to numpy array
+    logger.info("Converting rows to NumPy array")
     array_rows =  rows_to_numpy(rows)
 
     #get dataset basic info
