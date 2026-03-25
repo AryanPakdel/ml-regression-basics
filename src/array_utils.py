@@ -4,9 +4,8 @@ def rows_to_numpy(rows):
     if len(rows) <= 1:
         return np.array([])
 
-    data_rows = rows[1:]
     numeric_rows = []
-    for row in data_rows:
+    for row in rows:
         numeric_row = [float(value) for value in row]
         numeric_rows.append(numeric_row)
 

@@ -21,19 +21,17 @@ def load_csv_rows(path):
     return csv_file
 
 
-def get_csv_summary(rows) -> dict:
-    headers = rows[0]
-    data_rows = rows[1:]
+def get_csv_summary(headers,rows) -> dict:
+
     return {
-        "row_count": len(data_rows),
+        "row_count": len(rows),
         "column_count": len(headers),
         "headers": headers,
     }
 
 
-def find_inconsistent_rows(rows):
+def find_inconsistent_rows(headers,rows):
     inconsistent_rows = []
-    headers = rows[0]
     expected_length = len(headers)
     for idx, row in enumerate(rows):
         if len(row) != expected_length:

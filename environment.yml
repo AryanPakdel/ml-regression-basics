@@ -2,6 +2,7 @@ name: ml-regression-basics
 channels:
   - conda-forge
 dependencies:
-  - python=3.11
   - numpy
-prefix: /home/aryan/miniforge3/envs/ml-regression-basics
+  - python=3.11
+  - matplotlib
+prefix: /opt/homebrew/Caskroom/miniforge/base/envs/ml-regression-basics

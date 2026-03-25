@@ -5,6 +5,7 @@ from data_loader import check_dataset_path, load_csv_rows, get_csv_summary, find
 import argparse
 import logging
 from pathlib import Path
+from visualization import save_histogram, save_scatter_plot
 
 
 def setup_logging():
@@ -73,8 +74,11 @@ def main() -> None:
         logger.warning("Dataset is empty")
         return
 
+    headers = rows[0]
+    data = rows[1:]
+
     #get dataset summary
-    summary = get_csv_summary(rows)
+    summary = get_csv_summary(headers,data)
     logger.info("CSV loaded successfully")
     logger.info("Row count: %d", summary["row_count"])
     logger.info("Column count: %d", summary["column_count"])
@@ -82,9 +86,9 @@ def main() -> None:
 
     #Data Validation
     logger.info("Running data quality checks")
-    inconsistent_rows = find_inconsistent_rows(rows)
-    missing_entries = find_missing_values(rows)
-    non_numeric_values = find_non_numeric_values(rows)
+    inconsistent_rows = find_inconsistent_rows(headers,data)
+    missing_entries = find_missing_values(data)
+    non_numeric_values = find_non_numeric_values(data)
 
     logger.info("Inconsistent rows: %d", len(inconsistent_rows))
     logger.info("Missing values: %d", len(missing_entries))
@@ -104,13 +108,12 @@ def main() -> None:
 
     #convert dataset to numpy array
     logger.info("Converting rows to NumPy array")
-    array_rows =  rows_to_numpy(rows)
+    array_rows =  rows_to_numpy(data)
 
     #get dataset basic info
     basic_stats = compute_basic_stats(array_rows)
     logger.info("Basic Dataset Stats")  
     logger.info(f'Dataset shape :  {basic_stats["shape"]}')
-    headers = summary["headers"]
     for idx,header in enumerate(headers):
         logger.info(header + " :")
         for key,value in basic_stats.items():
@@ -118,7 +121,15 @@ def main() -> None:
                 continue
             logger.info(f"  {key} : {value[idx]}")  
         
-    
+    #Visualization
+    logger.info("Generating plots")
+    for idx, header in enumerate(headers):
+        plot_path = save_histogram(array_rows, headers, idx)
+        logger.info("Saved histogram for %s at %s", header, plot_path)
+
+    if len(headers) >= 2:
+        scatter_path = save_scatter_plot(array_rows, headers, 0, 2)
+        logger.info("Saved scatter plot at %s", scatter_path)
 
 
 if __name__ == "__main__":
